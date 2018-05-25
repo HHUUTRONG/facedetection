@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>tracking.js - face with camera</title>
+  <link rel="stylesheet" href="assets/demo.css">
+
+  <script src="tracking.js-master/build/tracking-min.js"></script>
+  <script src="tracking.js-master/build/data/face-min.js"></script>
+ <!--  <script src="tracking.js-master/assets/stats.min.js"></script> -->
+
+  <style>
+  video, canvas {
+    margin-left: 230px;
+    margin-top: 120px;
+    position: absolute;
+  }
+  </style>
+
+</head>
+<body>
+  <div class="demo-title">
+    <p><a href="http://trackingjs.com" target="_parent">tracking.js</a> － get user's webcam and detect faces</p>
+  </div>
+
+  <div class="demo-frame">
+    <div class="demo-container">
+      <video id="video" width="320" height="240" preload autoplay loop muted></video>
+      <canvas id="canvas" width="320" height="240"></canvas>
+      
+
+      
+    </div>
+
+
+  </div>
+   <div style="position: absolute; top: 100px; left: 800px;">
+       <button onclick="snapshot();">Take Snapshot</button>
+       <p>
+
+        Screenshots : <p>
+      <canvas  id="myCanvas" width="400" height="350"></canvas>  
+    </div>
+
+ <!--  <div id="cutface">
+      
+  </div> -->
+  
+ 
+  <script>
+     var ctx, canvass, recw, recth, recx, recty;
+    window.onload = function() {
+      var video = document.getElementById('video');
+      var canvas = document.getElementById('canvas');
+      var context = canvas.getContext('2d');
+      canvass = document.getElementById('myCanvas');
+      ctx = canvass.getContext('2d');
+      var tracker = new tracking.ObjectTracker('face');
+      tracker.setInitialScale(4);
+      tracker.setStepSize(2);
+      tracker.setEdgesDensity(0.1);
+      tracking.track('#video', tracker, { camera: true });
+      tracker.on('track', function(event) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        event.data.forEach(function(rect) {
+          context.strokeStyle = 'red';
+          context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+          // console.log('width: ' + rect.width);
+          // console.log('height: ' + rect.height);
+          // console.log('x ' + rect.x);
+          // console.log('y ' + rect.y);
+
+          recw = rect.width;
+          recth = rect.height;
+          recx = rect.x;
+          recty = rect.y;
+
+          context.font = '11px Helvetica';
+          context.fillStyle = "#fff";
+          context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+          context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+
+          setTimeout(function(){ snapshot(); }, 3000);
+
+          
+        });
+      });
+      // var gui = new dat.GUI();
+      // gui.add(tracker, 'edgesDensity', 0.1, 0.5).step(0.01);
+      // gui.add(tracker, 'initialScale', 1.0, 10.0).step(0.1);
+      // gui.add(tracker, 'stepSize', 1, 5).step(0.1);
+
+      
+    };
+
+    function snapshot() {
+         // Draws current image from the video element into the canvas
+          ctx.drawImage(video, 0,0, canvas.width, canvas.height);
+          // alert(recw + ' ' + recth + ' ' + recx + ' ' + recty);
+          console.log('recx ' + recx);
+          console.log('rec y ' + recty);
+           console.log('recw ' + recw);
+           console.log('recth ' + recth);
+          ctx.drawImage(canvass,
+                  recx, recty,   // Start at 70/20 pixels from the left and the top of the image (crop),
+                  recw, recth,   // "Get" a `50 * 50` (w * h) area from the source image (crop),
+                  0, 0,     // Place the result at 0, 0 in the canvas,
+                  100, 100); // With as width / height: 100 * 100 (scale)
+
+          // ctx.arc(canvass,recx,recty,80,0,2*Math.PI);
+          // ctx.stroke();
+    }
+    
+
+     
+  </script>
+
+</body>
+</html>
